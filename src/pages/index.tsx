@@ -35,7 +35,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
 
       <main className="container">
         <header className="headerTitle">
-          <img src="/images/logo_full.svg" alt="spacetraveling" />
+          <img src="/images/spacetraveling.svg" alt="logo" />
         </header>
         <section className="posts">
           {postsPagination.results.map(post => (

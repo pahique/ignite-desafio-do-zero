@@ -26,20 +26,80 @@ interface PostProps {
   post: Post;
 }
 
-// export default function Post() {
-//   // TODO
-// }
+export default function Post({ post }: PostProps): JSX.Element {
+  return (
+    <>
+      <main className="container">
+        <header className="headerTitle">
+          <img src="/images/spacetraveling.svg" alt="logo" />
+        </header>
+        <body>
+          <img src={post.data.banner.url} alt="banner" />
+          <div>
+            <span className="title">{post.data.title}</span>
+            <span className="publicationDate">
+              {post.first_publication_date}
+            </span>
+            <span className="author">{post.data.author}</span>
+          </div>
+        </body>
+      </main>
+    </>
+  );
+}
 
-// export const getStaticPaths = async () => {
-//   const prismic = getPrismicClient({});
-//   const posts = await prismic.getByType(TODO);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const prismic = getPrismicClient({});
+  const postsResponse = await prismic.getByType('posts');
 
-//   // TODO
-// };
+  const paths = postsResponse.results.map(post => {
+    return {
+      params: {
+        slug: post.uid,
+      },
+    };
+  });
 
-// export const getStaticProps = async ({params }) => {
-//   const prismic = getPrismicClient({});
-//   const response = await prismic.getByUID(TODO);
+  return {
+    paths,
+    fallback: 'blocking',
+    // true: se ainda não foi gerado, abre a tela sem conteúdo, faz a requisição e espera montar a tela
+    // false: se o post não foi gerado de forma estática ainda, retorna 404, usado quando você já gerou tudo
+    // blocking: se ainda não foi gerado, carrega usando o server-side rendering, e só mostra a tela quando estiver completo
+  };
+};
 
-//   // TODO
-// };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { slug } = params;
+  const prismic = getPrismicClient({});
+  const response = await prismic.getByUID('posts', String(slug));
+
+  console.log(JSON.stringify(response, null, 2));
+
+  const post = {
+    first_publication_date: new Date(
+      response.first_publication_date
+    ).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }),
+    data: {
+      title: response.data.title,
+      banner: {
+        url: response.data.banner.url,
+      },
+      author: response.data.author,
+      content: response.data.content.map(content => {
+        return {
+          heading: content.heading,
+          body: [],
+        };
+      }),
+    },
+  };
+
+  return {
+    props: { post },
+  };
+};
