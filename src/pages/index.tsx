@@ -2,6 +2,7 @@ import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
 
+import { useState } from 'react';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -27,12 +28,12 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
+  const handleLoadMoreClick = async (): Promise<void> => {
+    // TODO
+  };
+
   return (
     <>
-      <Head>
-        <title>Home</title>
-      </Head>
-
       <main className="container">
         <header className="headerTitle">
           <img src="/images/spacetraveling.svg" alt="logo" />
@@ -40,8 +41,10 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         <section className="posts">
           {postsPagination.results.map(post => (
             <article key={post.uid}>
-              <Link href={`/post/${post.uid}`}>{post.data.title}</Link>
-              <span className="subtitle">{post.data.subtitle}</span>
+              <h1>
+                <Link href={`/post/${post.uid}`}>{post.data.title}</Link>
+              </h1>
+              <h2>{post.data.subtitle}</h2>
               <div className="publicationDate">
                 {post.first_publication_date}
               </div>
@@ -49,7 +52,9 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
             </article>
           ))}
           {postsPagination.next_page && (
-            <button type="button">Carregar mais posts</button>
+            <button type="button" onClick={handleLoadMoreClick}>
+              Carregar mais posts
+            </button>
           )}
         </section>
       </main>

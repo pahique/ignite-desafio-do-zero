@@ -1,5 +1,5 @@
-import Document, { Html, Main, NextScript } from 'next/document';
-import Head from 'next/head';
+import Document, { Html, Head, Main, NextScript } from 'next/document';
+// import Head from 'next/head';
 
 export default class MyDocument extends Document {
   render(): JSX.Element {
