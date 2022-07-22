@@ -1,5 +1,10 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 
+import {
+  AiOutlineCalendar,
+  AiOutlineUser,
+  AiOutlineClockCircle,
+} from 'react-icons/ai';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -38,9 +43,17 @@ export default function Post({ post }: PostProps): JSX.Element {
           <div>
             <span className="title">{post.data.title}</span>
             <span className="publicationDate">
+              <AiOutlineCalendar />
               {post.first_publication_date}
             </span>
-            <span className="author">{post.data.author}</span>
+            <span className="author">
+              <AiOutlineUser />
+              {post.data.author}
+            </span>
+            <span className="timeAvailable">
+              <AiOutlineClockCircle />
+              {post.first_publication_date}
+            </span>
           </div>
         </body>
       </main>

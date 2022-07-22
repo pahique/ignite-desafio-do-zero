@@ -1,6 +1,9 @@
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Head from 'next/head';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { AiOutlineCalendar, AiOutlineUser } from 'react-icons/ai';
 
 import { useState } from 'react';
 import { getPrismicClient } from '../services/prismic';
@@ -46,9 +49,13 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
               </h1>
               <h2>{post.data.subtitle}</h2>
               <div className="publicationDate">
+                <AiOutlineCalendar />
                 {post.first_publication_date}
               </div>
-              <div className="author">{post.data.author}</div>
+              <div className="author">
+                <AiOutlineUser />
+                {post.data.author}
+              </div>
             </article>
           ))}
           {postsPagination.next_page && (
@@ -64,20 +71,20 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient({});
-  const postsResponse = await prismic.getByType('posts');
+  const postsResponse = await prismic.getByType('posts', { pageSize: 2 });
 
   console.log(JSON.stringify(postsResponse, null, 2));
 
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: new Date(
-        post.first_publication_date
-      ).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      }),
+      first_publication_date: format(
+        new Date(post.first_publication_date),
+        'PP',
+        {
+          locale: ptBR,
+        }
+      ),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
