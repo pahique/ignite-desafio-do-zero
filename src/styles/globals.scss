@@ -51,3 +51,9 @@ a {
 article {
   margin: 10px 0px;
 }
+
+.button-highlight {
+  border: 0;
+  background-color: transparent;
+  color: var(--magenta-50)
+}

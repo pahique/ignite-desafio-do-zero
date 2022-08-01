@@ -31,8 +31,20 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
-  const handleLoadMoreClick = async (): Promise<void> => {
-    // TODO
+  const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+  const [hasMorePosts, setHasMorePosts] = useState<boolean>(
+    postsPagination.next_page !== null
+  );
+
+  const handleLoadMoreClick = (): void => {
+    fetch(postsPagination.next_page)
+      .then(response => response.json())
+      .then(data => {
+        const modifiedPosts = [...posts];
+        modifiedPosts.push(...data.results);
+        setPosts(modifiedPosts);
+        setHasMorePosts(data.next_page !== null);
+      });
   };
 
   return (
@@ -42,7 +54,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
           <img src="/images/spacetraveling.svg" alt="logo" />
         </header>
         <section className="posts">
-          {postsPagination.results.map(post => (
+          {posts.map(post => (
             <article key={post.uid}>
               <h1>
                 <Link href={`/post/${post.uid}`}>{post.data.title}</Link>
@@ -58,8 +70,12 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
               </div>
             </article>
           ))}
-          {postsPagination.next_page && (
-            <button type="button" onClick={handleLoadMoreClick}>
+          {hasMorePosts && (
+            <button
+              type="button"
+              onClick={handleLoadMoreClick}
+              className="button-highlight"
+            >
               Carregar mais posts
             </button>
           )}
