@@ -10,6 +10,7 @@ import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import Header from '../components/Header';
 
 interface Post {
   uid?: string;
@@ -50,9 +51,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   return (
     <>
       <main className="container">
-        <header className="headerTitle">
-          <img src="/images/spacetraveling.svg" alt="logo" />
-        </header>
+        <Header />
         <section className="posts">
           {posts.map(post => (
             <article key={post.uid}>

@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import Link from 'next/link';
+import { RichText } from 'prismic-dom';
 
 import {
   AiOutlineCalendar,
@@ -9,6 +12,7 @@ import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import Header from '../../components/Header';
 
 interface Post {
   first_publication_date: string | null;
@@ -32,12 +36,21 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): JSX.Element {
+  const [readingTime, setReadingTime] = useState<number>();
+
+  useEffect(() => {
+    const totalWords = post.data.content.reduce((sum, item) => {
+      const wordCountHeading = item.heading.split(/\w/).length;
+      const wordCountBody = RichText.asText(item.body).split(/\w/).length;
+      return sum + wordCountHeading + wordCountBody;
+    }, 0);
+    setReadingTime(Math.ceil(totalWords / 200));
+  });
+
   return (
     <>
       <main className="container">
-        <header className="headerTitle">
-          <img src="/images/spacetraveling.svg" alt="logo" />
-        </header>
+        <Header />
         <body>
           <img src={post.data.banner.url} alt="banner" />
           <div>
@@ -52,7 +65,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             </span>
             <span className="timeAvailable">
               <AiOutlineClockCircle />
-              {post.first_publication_date}
+              {readingTime} min
             </span>
           </div>
         </body>
