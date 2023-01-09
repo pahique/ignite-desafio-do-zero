@@ -1,24 +1,18 @@
 .container {
-
+  width: var(--page-width);
 }
 
-.headerTitle {
-
+.buttonHighlight {
+  border: 0;
+  background-color: transparent;
+  color: var(--magenta-50)
 }
 
-.posts {
-
+.articleFooter {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
 }
-
-.subtitle {
-
-}
-
-.publicationDate {
-
-}
-
-.author {
-
-}
-

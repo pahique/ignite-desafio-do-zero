@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Link from 'next/link';
 import { RichText } from 'prismic-dom';
 
 import {
@@ -45,30 +44,45 @@ export default function Post({ post }: PostProps): JSX.Element {
       return sum + wordCountHeading + wordCountBody;
     }, 0);
     setReadingTime(Math.ceil(totalWords / 200));
-  });
+  }, [post]);
 
   return (
     <>
-      <main className="container">
+      <main className={styles.container}>
         <Header />
-        <body>
+        <section className={styles.postBanner}>
           <img src={post.data.banner.url} alt="banner" />
-          <div>
-            <span className="title">{post.data.title}</span>
-            <span className="publicationDate">
+        </section>
+        <section className={styles.postHeader}>
+          <div className={styles.postTitle}>{post.data.title}</div>
+          <div className={styles.postInfo}>
+            <span className={commonStyles.publicationDate}>
               <AiOutlineCalendar />
               {post.first_publication_date}
             </span>
-            <span className="author">
+            <span className={commonStyles.author}>
               <AiOutlineUser />
               {post.data.author}
             </span>
-            <span className="timeAvailable">
+            <span className={commonStyles.timeAvailable}>
               <AiOutlineClockCircle />
               {readingTime} min
             </span>
           </div>
-        </body>
+        </section>
+        <section className={styles.postContent}>
+          {post.data.content.map(content => (
+            <article>
+              <div className={styles.contentHeading}>{content.heading}</div>
+              <div
+                className={styles.contentBody}
+                dangerouslySetInnerHTML={{
+                  __html: RichText.asHtml(content.body),
+                }}
+              />
+            </article>
+          ))}
+        </section>
       </main>
     </>
   );
@@ -100,7 +114,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const prismic = getPrismicClient({});
   const response = await prismic.getByUID('posts', String(slug));
 
-  console.log(JSON.stringify(response, null, 2));
+  // console.log(JSON.stringify(response, null, 2));
 
   const post = {
     first_publication_date: new Date(
@@ -119,7 +133,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       content: response.data.content.map(content => {
         return {
           heading: content.heading,
-          body: [],
+          body: content.body,
         };
       }),
     },
