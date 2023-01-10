@@ -38,24 +38,18 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): JSX.Element {
-  const [readingTime, setReadingTime] = useState<number>();
   const router = useRouter();
 
-  useEffect(() => {
-    if (post?.data) {
-      const totalWords = post.data.content.reduce((sum, item) => {
-        const wordCountHeading = item.heading.match(/\S+\s*/g).length;
-        const wordCountBody = RichText.asText(item.body).match(
-          /\S+\s*/g
-        ).length;
-        return sum + wordCountHeading + wordCountBody;
-      }, 0);
-      setReadingTime(Math.ceil(totalWords / 200));
-    }
-  }, [post]);
+  const calculateReadingTime = (currentPost: Post): number => {
+    const totalWords = currentPost.data.content.reduce((sum, item) => {
+      const wordCountHeading = item.heading.match(/\S+\s*/g).length;
+      const wordCountBody = RichText.asText(item.body).match(/\S+\s*/g).length;
+      return sum + wordCountHeading + wordCountBody;
+    }, 0);
+    return Math.ceil(totalWords / 200);
+  };
 
   if (router.isFallback) {
-    console.log('Carregando...');
     return (
       <main className={styles.container}>
         <Header />
@@ -85,7 +79,7 @@ export default function Post({ post }: PostProps): JSX.Element {
             </span>
             <span className={commonStyles.timeAvailable}>
               <AiOutlineClockCircle />
-              {readingTime} min
+              {calculateReadingTime(post)} min
             </span>
           </div>
         </section>
@@ -111,13 +105,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const prismic = getPrismicClient({});
   const postsResponse = await prismic.getByType('posts');
 
-  const paths = postsResponse.results.map(post => {
+  const paths = postsResponse.results.slice(0, 3).map(post => {
     return {
       params: {
         slug: post.uid,
       },
     };
   });
+  console.log('paths', paths);
 
   return {
     paths,
