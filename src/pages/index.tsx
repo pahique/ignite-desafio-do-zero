@@ -35,13 +35,7 @@ export const convertPosts = (inputPosts: PrismicDocument[]): Post[] => {
   return inputPosts.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'PP',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -83,7 +77,13 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
               <div className={styles.articleFooter}>
                 <div className={commonStyles.publicationDate}>
                   <AiOutlineCalendar />
-                  {post.first_publication_date}
+                  {format(
+                    new Date(post.first_publication_date),
+                    'dd MMM yyyy',
+                    {
+                      locale: ptBR,
+                    }
+                  )}
                 </div>
                 <div className={commonStyles.author}>
                   <AiOutlineUser />

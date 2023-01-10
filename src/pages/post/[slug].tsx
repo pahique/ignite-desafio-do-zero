@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import { useRouter } from 'next/router';
 import { RichText } from 'prismic-dom';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 import {
   AiOutlineCalendar,
@@ -36,16 +39,30 @@ interface PostProps {
 
 export default function Post({ post }: PostProps): JSX.Element {
   const [readingTime, setReadingTime] = useState<number>();
+  const router = useRouter();
 
   useEffect(() => {
-    const totalWords = post.data.content.reduce((sum, item) => {
-      const wordCountHeading = item.heading.split(/\w/).length;
-      const wordCountBody = RichText.asText(item.body).split(/\w/).length;
-      return sum + wordCountHeading + wordCountBody;
-    }, 0);
-    setReadingTime(Math.ceil(totalWords / 200));
+    if (post?.data) {
+      const totalWords = post.data.content.reduce((sum, item) => {
+        const wordCountHeading = item.heading.match(/\S+\s*/g).length;
+        const wordCountBody = RichText.asText(item.body).match(
+          /\S+\s*/g
+        ).length;
+        return sum + wordCountHeading + wordCountBody;
+      }, 0);
+      setReadingTime(Math.ceil(totalWords / 200));
+    }
   }, [post]);
 
+  if (router.isFallback) {
+    console.log('Carregando...');
+    return (
+      <main className={styles.container}>
+        <Header />
+        <h1>Carregando...</h1>
+      </main>
+    );
+  }
   return (
     <>
       <main className={styles.container}>
@@ -58,7 +75,9 @@ export default function Post({ post }: PostProps): JSX.Element {
           <div className={styles.postInfo}>
             <span className={commonStyles.publicationDate}>
               <AiOutlineCalendar />
-              {post.first_publication_date}
+              {format(new Date(post.first_publication_date), 'dd MMM yyyy', {
+                locale: ptBR,
+              })}
             </span>
             <span className={commonStyles.author}>
               <AiOutlineUser />
@@ -72,7 +91,7 @@ export default function Post({ post }: PostProps): JSX.Element {
         </section>
         <section className={styles.postContent}>
           {post.data.content.map(content => (
-            <article>
+            <article key={content.heading}>
               <div className={styles.contentHeading}>{content.heading}</div>
               <div
                 className={styles.contentBody}
@@ -102,7 +121,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths,
-    fallback: 'blocking',
+    fallback: true,
     // true: se ainda não foi gerado, abre a tela sem conteúdo, faz a requisição e espera montar a tela
     // false: se o post não foi gerado de forma estática ainda, retorna 404, usado quando você já gerou tudo
     // blocking: se ainda não foi gerado, carrega usando o server-side rendering, e só mostra a tela quando estiver completo
@@ -117,15 +136,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // console.log(JSON.stringify(response, null, 2));
 
   const post = {
-    first_publication_date: new Date(
-      response.first_publication_date
-    ).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    }),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
+      subtitle: response.data.subtitle,
       banner: {
         url: response.data.banner.url,
       },
